@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cipher Encryption/Decryption</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label, select, textarea, input, button {
+      margin: 10px 0;
+    }
+
+    textarea, input, select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+
+    nav {
+      background-color: #007BFF;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="compare.html">Compare Ciphers</a>
+  </nav>
+
+  <h1>Cipher Encryption and Decryption</h1>
+  <form id="cipher-form">
+    <label for="plaintext">Plaintext:</label>
+    <textarea id="plaintext" name="plaintext" rows="3" required></textarea>
+
+    <label for="cipher">Choose Cipher:</label>
+    <select id="cipher" name="cipher" required>
+      <option value="caesar">Caesar Cipher</option>
+      <option value="monoalphabetic">Monoalphabetic Cipher</option>
+      <option value="vigenere">Vigenère Cipher</option>
+      <option value="playfair">Playfair Cipher</option>
+      <option value="hill">Hill Cipher</option>
+      <option value="railFence">Rail Fence Cipher</option>
+      <option value="columnar">Columnar Transposition Cipher</option>
+      <option value="atbash">Atbash Cipher</option>
+    </select>
+
+    <label for="key">Key (if required):</label>
+    <input type="text" id="key" name="key">
+
+    <button type="button" id="encrypt-btn">Encrypt</button>
+    <button type="button" id="decrypt-btn">Decrypt</button>
+  </form>
+
+  <h2>Result</h2>
+  <textarea id="result" rows="3" readonly></textarea>
+
+  <script>
+    document.getElementById("encrypt-btn").addEventListener("click", () => processCipher("encrypt"));
+    document.getElementById("decrypt-btn").addEventListener("click", () => processCipher("decrypt"));
+
+    function processCipher(action) {
+      const plaintext = document.getElementById("plaintext").value;
+      const cipher = document.getElementById("cipher").value;
+      const key = document.getElementById("key").value;
+      const resultField = document.getElementById("result");
+
+      if (plaintext.trim() === "") {
+        alert("Please enter plaintext.");
+        return;
+      }
+
+      let result = "";
+      switch (cipher) {
+        case "caesar":
+          result = action === "encrypt" 
+            ? caesarEncrypt(plaintext, parseInt(key)) 
+            : caesarDecrypt(plaintext, parseInt(key));
+          break;
+        case "monoalphabetic":
+          result = action === "encrypt" 
+            ? monoalphabeticEncrypt(plaintext, key) 
+            : monoalphabeticDecrypt(plaintext, key);
+          break;
+        case "vigenere":
+          result = action === "encrypt" 
+            ? vigenereEncrypt(plaintext, key) 
+            : vigenereDecrypt(plaintext, key);
+          break;
+        case "atbash":
+          result = atbashCipher(plaintext);
+          break;
+        // Add other ciphers similarly
+        default:
+          result = "Cipher not implemented yet.";
+      }
+      resultField.value = result;
+    }
+
+    function caesarEncrypt(text, shift) {
+      return text
+        .split(" ")
+        .map(char => {
+          if (char.match(/[a-z]/i)) {
+            const base = char.charCodeAt(0) >= 97 ? 97 : 65;
+            return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
+          }
+          return char;
+        })
+        .join("");
+    }
+
+    function caesarDecrypt(text, shift) {
+      return caesarEncrypt(text, 26 - shift);
+    }
+
+    function monoalphabeticEncrypt(text, key) {
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+      key = key.toLowerCase();
+      return text
+        .toLowerCase()
+        .split(" ")
+        .map(char => (alphabet.includes(char) ? key[alphabet.indexOf(char)] : char))
+        .join("");
+    }
+
+    function monoalphabeticDecrypt(text, key) {
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+      key = key.toLowerCase();
+      return text
+        .toLowerCase()
+        .split(" ")
+        .map(char => (key.includes(char) ? alphabet[key.indexOf(char)] : char))
+        .join("");
+    }
+
+    function vigenereEncrypt(text, key) {
+      key = key.toLowerCase();
+      let keyIndex = 0;
+      return text
+        .split(" ")
+        .map(char => {
+          if (char.match(/[a-z]/i)) {
+            const base = char.charCodeAt(0) >= 97 ? 97 : 65;
+            const shift = key[keyIndex % key.length].charCodeAt(0) - 97;
+            keyIndex++;
+            return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
+          }
+          return char;
+        })
+        .join("");
+    }
+
+    function vigenereDecrypt(text, key) {
+      key = key.toLowerCase();
+      let keyIndex = 0;
+      return text
+        .split(" ")
+        .map(char => {
+          if (char.match(/[a-z]/i)) {
+            const base = char.charCodeAt(0) >= 97 ? 97 : 65;
+            const shift = 26 - (key[keyIndex % key.length].charCodeAt(0) - 97);
+            keyIndex++;
+            return String.fromCharCode(((char.charCodeAt(0) - base + shift) % 26) + base);
+          }
+          return char;
+        })
+        .join("");
+    }
+
+    function atbashCipher(text) {
+      return text
+        .split(" ")
+        .map(char => {
+          if (char.match(/[a-z]/i)) {
+            const base = char.charCodeAt(0) >= 97 ? 97 : 65;
+            return String.fromCharCode(base + (25 - (char.charCodeAt(0) - base)));
+          }
+          return char;
+        })
+        .join("");
+    }
+  </script>
+</body>
+</html>

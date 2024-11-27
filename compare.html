@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Ciphers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    nav {
+      background-color: #007BFF;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label, select, textarea, button {
+      margin: 10px 0;
+    }
+
+    textarea, select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="compare.html">Compare Ciphers</a>
+  </nav>
+  <h1>Compare Cipher Performance</h1>
+  <form id="compare-form">
+    <label for="plaintext">Plaintext:</label>
+    <textarea id="plaintext" name="plaintext" rows="3" required></textarea>
+
+    <label for="cipher1">Select First Cipher:</label>
+    <select id="cipher1" name="cipher1" required>
+      <option value="caesar">Caesar Cipher</option>
+      <option value="monoalphabetic">Monoalphabetic Cipher</option>
+      <option value="vigenere">Vigenère Cipher</option>
+      <option value="playfair">Playfair Cipher</option>
+      <option value="hill">Hill Cipher</option>
+      <option value="railFence">Rail Fence Cipher</option>
+      <option value="columnar">Columnar Transposition Cipher</option>
+      <option value="atbash">Atbash Cipher</option>
+    </select>
+
+    <label for="cipher2">Select Second Cipher:</label>
+    <select id="cipher2" name="cipher2" required>
+      <option value="caesar">Caesar Cipher</option>
+      <option value="monoalphabetic">Monoalphabetic Cipher</option>
+      <option value="vigenere">Vigenère Cipher</option>
+      <option value="playfair">Playfair Cipher</option>
+      <option value="hill">Hill Cipher</option>
+      <option value="railFence">Rail Fence Cipher</option>
+      <option value="columnar">Columnar Transposition Cipher</option>
+      <option value="atbash">Atbash Cipher</option>
+    </select>
+
+    <button type="button" id="compare-btn">Compare</button>
+    <button type="button" id="save-btn">Save Results</button>
+  </form>
+
+  <h2>Comparison Results</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Cipher</th>
+        <th>Encryption Time (µs)</th>
+        <th>Decryption Time (µs)</th>
+        <th>Time Complexity</th>
+      </tr>
+    </thead>
+    <tbody id="results-table"></tbody>
+  </table>
+
+  <h2>Comparison History</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Plaintext</th>
+        <th>Cipher 1</th>
+        <th>Cipher 2</th>
+        <th>Enc Time 1 (µs)</th>
+        <th>Dec Time 1 (µs)</th>
+        <th>Enc Time 2 (µs)</th>
+        <th>Dec Time 2 (µs)</th>
+      </tr>
+    </thead>
+    <tbody id="history-table"></tbody>
+  </table>
+
+  <script>
+    const apiUrl = "http://localhost:5000"; // Backend API URL
+
+    document.getElementById("compare-btn").addEventListener("click", compareCiphers);
+    document.getElementById("save-btn").addEventListener("click", saveResults);
+
+    function compareCiphers() {
+      const plaintext = document.getElementById("plaintext").value;
+      const cipher1 = document.getElementById("cipher1").value;
+      const cipher2 = document.getElementById("cipher2").value;
+
+      if (plaintext.trim() === "" || cipher1 === cipher2) {
+        alert("Please enter plaintext and select two different ciphers.");
+        return;
+      }
+
+      const resultsTable = document.getElementById("results-table");
+      resultsTable.innerHTML = "";
+
+      const cipherResults = [cipher1, cipher2].map(cipher => {
+        const encryptionTime = Math.floor(Math.random() * 1000) + 100; // Simulate a time between 100 to 1000 µs
+        const decryptionTime = Math.floor(Math.random() * 1000) + 100; // Simulate a time between 100 to 1000 µs
+        const timeComplexity = getTimeComplexity(cipher);
+
+        return { cipher, encryptionTime, decryptionTime, timeComplexity };
+      });
+
+      cipherResults.forEach(result => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${result.cipher}</td>
+          <td>${result.encryptionTime} µs</td>
+          <td>${result.decryptionTime} µs</td>
+          <td>${result.timeComplexity}</td>
+        `;
+        resultsTable.appendChild(row);
+      });
+    }
+
+    function saveResults() {
+  const plaintext = document.getElementById("plaintext").value;
+  const cipher1 = document.getElementById("cipher1").value;
+  const cipher2 = document.getElementById("cipher2").value;
+  const rows = document.querySelectorAll("#results-table tr");
+
+  if (rows.length === 0) {
+    alert("Please compare ciphers first.");
+    return;
+  }
+
+  // Extract encryption and decryption times from the table rows
+  const encTime1 = parseFloat(rows[0].children[1].textContent.replace(" µs", ""));
+  const decTime1 = parseFloat(rows[0].children[2].textContent.replace(" µs", ""));
+  const encTime2 = parseFloat(rows[1].children[1].textContent.replace(" µs", ""));
+  const decTime2 = parseFloat(rows[1].children[2].textContent.replace(" µs", ""));
+
+  // Check if the times are valid numbers
+  if (isNaN(encTime1) || isNaN(decTime1) || isNaN(encTime2) || isNaN(decTime2)) {
+    alert("Invalid times detected. Please try again.");
+    return;
+  }
+
+  const data = {
+    plaintext,
+    cipher1,
+    cipher2,
+    encryptionTime1: encTime1,
+    decryptionTime1: decTime1,
+    encryptionTime2: encTime2,
+    decryptionTime2: decTime2,
+  };
+
+  fetch(`${apiUrl}/compare`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then(response => response.json())
+    .then(() => {
+      alert("Results saved!");
+      loadHistory();
+    })
+    .catch(err => console.error(err));
+}
+
+
+    function loadHistory() {
+      fetch(`${apiUrl}/history`)
+        .then(response => response.json())
+        .then(history => {
+          const historyTable = document.getElementById("history-table");
+          historyTable.innerHTML = "";
+
+          history.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${new Date(item.comparisonDate).toLocaleString()}</td>
+              <td>${item.plaintext}</td>
+              <td>${item.cipher1}</td>
+              <td>${item.cipher2}</td>
+              <td>${item.encTime1} µs</td>
+              <td>${item.decTime1} µs</td>
+              <td>${item.encTime2} µs</td>
+              <td>${item.decTime2} µs</td>
+            `;
+            historyTable.appendChild(row);
+          });
+        })
+        .catch(err => console.error(err));
+    }
+
+    function getTimeComplexity(cipher) {
+      switch (cipher) {
+        case "caesar":
+        case "monoalphabetic":
+        case "vigenere":
+        case "atbash":
+          return "O(n)";
+        case "playfair":
+        case "columnar":
+          return "O(n²)";
+        case "hill":
+          return "O(n³)";
+        case "railFence":
+          return "O(n)";
+        default:
+          return "Unknown";
+      }
+    }
+
+    // Load history on page load
+    loadHistory();
+  </script>
+</body>
+</html>
